@@ -7,7 +7,7 @@ export interface AIConfig {
 }
 
 const DEFAULT_CONFIG: AIConfig = {
-  model: "mistralai/mistral-7b-instruct:free",
+  model: "openai/gpt-oss-120b:free",
   temperature: 0.7,
   maxTokens: 2048,
 };

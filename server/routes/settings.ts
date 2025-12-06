@@ -7,7 +7,7 @@ export const handleGetAIConfig: RequestHandler = async (req, res) => {
 
     if (!db) {
       return res.json({
-        model: "mistralai/mistral-7b-instruct:free",
+        model: "openai/gpt-oss-120b:free",
         temperature: 0.7,
         maxTokens: 2048,
       });
@@ -18,7 +18,7 @@ export const handleGetAIConfig: RequestHandler = async (req, res) => {
     const config = configSnap.exists
       ? configSnap.data()
       : {
-          model: "mistralai/mistral-7b-instruct:free",
+          model: "openai/gpt-oss-120b:free",
           temperature: 0.7,
           maxTokens: 2048,
         };
@@ -27,7 +27,7 @@ export const handleGetAIConfig: RequestHandler = async (req, res) => {
   } catch (error) {
     console.error("Error getting AI config:", error);
     return res.json({
-      model: "mistralai/mistral-7b-instruct:free",
+      model: "openai/gpt-oss-120b:free",
       temperature: 0.7,
       maxTokens: 2048,
     });
