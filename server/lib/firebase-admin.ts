@@ -10,22 +10,61 @@ export function initializeFirebaseAdmin() {
   if (initialized) return;
 
   try {
-    const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-    if (!serviceAccountKey) {
-      console.error(
-        "CRITICAL: FIREBASE_SERVICE_ACCOUNT_KEY not set. Firebase Admin SDK cannot initialize. AI chat and admin operations will fail.",
-      );
-      console.error(
-        "Please set FIREBASE_SERVICE_ACCOUNT_KEY environment variable with your Firebase service account JSON.",
-      );
-      return;
+    // Support two initialization methods:
+    // 1. Full JSON in FIREBASE_SERVICE_ACCOUNT_KEY (for local development)
+    // 2. Individual env variables (for Vercel/production)
+
+    let serviceAccount: any;
+
+    const fullJson = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+    if (fullJson) {
+      try {
+        serviceAccount = JSON.parse(fullJson);
+      } catch {
+        console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY JSON");
+        return;
+      }
+    } else {
+      // Build service account from individual environment variables
+      const projectId = process.env.FIREBASE_PROJECT_ID;
+      const privateKeyId = process.env.FIREBASE_PRIVATE_KEY_ID;
+      const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+      const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+      const clientId = process.env.FIREBASE_CLIENT_ID;
+
+      if (!projectId || !privateKeyId || !privateKey || !clientEmail || !clientId) {
+        console.error(
+          "CRITICAL: Firebase service account credentials not configured.",
+        );
+        console.error(
+          "Set either FIREBASE_SERVICE_ACCOUNT_KEY (full JSON) or these individual variables:",
+        );
+        console.error("  - FIREBASE_PROJECT_ID");
+        console.error("  - FIREBASE_PRIVATE_KEY_ID");
+        console.error("  - FIREBASE_PRIVATE_KEY");
+        console.error("  - FIREBASE_CLIENT_EMAIL");
+        console.error("  - FIREBASE_CLIENT_ID");
+        return;
+      }
+
+      serviceAccount = {
+        type: "service_account",
+        project_id: projectId,
+        private_key_id: privateKeyId,
+        private_key: privateKey.replace(/\\n/g, "\n"), // Handle escaped newlines
+        client_email: clientEmail,
+        client_id: clientId,
+        auth_uri: "https://accounts.google.com/o/oauth2/auth",
+        token_uri: "https://oauth2.googleapis.com/token",
+        auth_provider_x509_cert_url:
+          "https://www.googleapis.com/oauth2/v1/certs",
+      };
     }
 
     let app;
     if (getApps().length > 0) {
       app = getApp();
     } else {
-      const serviceAccount = JSON.parse(serviceAccountKey);
       app = initializeApp({
         credential: cert(serviceAccount),
         projectId: serviceAccount.project_id,
