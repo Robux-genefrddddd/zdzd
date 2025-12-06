@@ -11,7 +11,7 @@ export const handleAIChat: RequestHandler = async (req, res) => {
       idToken,
       userMessage,
       conversationHistory = [],
-      model = "x-ai/grok-4.1-fast:free",
+      model = "openai/gpt-oss-120b:free",
       temperature = 0.7,
       maxTokens = 2048,
     } = validated;
@@ -48,17 +48,43 @@ export const handleAIChat: RequestHandler = async (req, res) => {
     const userDocRef = db.collection("users").doc(userId);
     const userDocSnap = await userDocRef.get();
 
-    if (!userDocSnap.exists) {
-      return res.status(404).json({
-        error: "User not found",
-      });
-    }
+    let userData: any;
 
-    const userData = userDocSnap.data();
-    if (!userData) {
-      return res.status(404).json({
-        error: "User data not found",
-      });
+    if (!userDocSnap.exists) {
+      // Auto-create user document if it doesn't exist (handles partial registration failures)
+      console.warn(
+        `User document not found for ${userId}. Creating with default settings.`,
+      );
+
+      const defaultUserData = {
+        uid: userId,
+        email: decoded.email || "",
+        displayName: decoded.email?.split("@")[0] || "User",
+        plan: "Free",
+        role: "user",
+        category: "individual",
+        messagesUsed: 0,
+        messagesLimit: 10,
+        createdAt: Date.now(),
+        isAdmin: false,
+      };
+
+      try {
+        await userDocRef.set(defaultUserData);
+        userData = defaultUserData;
+      } catch (createError) {
+        console.error("Failed to create user document:", createError);
+        return res.status(500).json({
+          error: "Failed to initialize user profile. Please try again.",
+        });
+      }
+    } else {
+      userData = userDocSnap.data();
+      if (!userData) {
+        return res.status(404).json({
+          error: "User data not found",
+        });
+      }
     }
 
     // Check if user has credits
@@ -82,6 +108,10 @@ export const handleAIChat: RequestHandler = async (req, res) => {
 
     // Validate model is allowed
     const allowedModels = [
+      "openai/gpt-oss-120b:free",
+      "mistralai/mistral-7b-instruct:free",
+      "google/gemma-3-27b-it:free",
+      "amazon/nova-2-lite-v1:free",
       "x-ai/grok-4.1-fast:free",
       "gpt-4",
       "gpt-3.5-turbo",
@@ -237,7 +267,7 @@ export const handleGetAIConfig: RequestHandler = async (req, res) => {
     const db = getAdminDb();
     if (!db) {
       return res.json({
-        model: "x-ai/grok-4.1-fast:free",
+        model: "openai/gpt-oss-120b:free",
         temperature: 0.7,
         maxTokens: 2048,
       });
@@ -247,7 +277,7 @@ export const handleGetAIConfig: RequestHandler = async (req, res) => {
     const config = configDoc.exists ? configDoc.data() : {};
 
     return res.json({
-      model: config.model || "x-ai/grok-4.1-fast:free",
+      model: config.model || "openai/gpt-oss-120b:free",
       temperature: config.temperature || 0.7,
       maxTokens: config.maxTokens || 2048,
     });

@@ -260,7 +260,7 @@ export function Sidebar({
                     isDark ? "text-muted-foreground" : "text-[#3F3F3F]/70"
                   }`}
                 >
-                  {loading ? "..." : userData?.email?.split("@")[0] || "Pro"}
+                  {loading ? "..." : userData?.plan || "Free"}
                 </p>
               </div>
             </button>

@@ -7,7 +7,7 @@ export interface AIConfig {
 }
 
 const DEFAULT_CONFIG: AIConfig = {
-  model: "x-ai/grok-4.1-fast:free",
+  model: "openai/gpt-oss-120b:free",
   temperature: 0.7,
   maxTokens: 2048,
 };
