@@ -24,11 +24,9 @@ export async function initializeRateLimiter() {
       });
 
       redisClient.on("error", (err) =>
-        console.error("Redis Client Error", err)
+        console.error("Redis Client Error", err),
       );
-      redisClient.on("connect", () =>
-        console.log("Redis Client Connected")
-      );
+      redisClient.on("connect", () => console.log("Redis Client Connected"));
 
       await redisClient.connect();
       console.log("Redis rate limiter initialized");
@@ -72,13 +70,7 @@ export async function checkRateLimit(
   retryAfter?: number;
 }> {
   if (redisClient) {
-    return checkRateLimitRedis(
-      redisClient,
-      key,
-      maxRequests,
-      windowMs,
-      weight,
-    );
+    return checkRateLimitRedis(redisClient, key, maxRequests, windowMs, weight);
   } else {
     return checkRateLimitMemory(key, maxRequests, windowMs, weight);
   }
@@ -134,7 +126,10 @@ async function checkRateLimitRedis(
     }
 
     // Add current request with timestamp
-    await client.zAdd(redisKey, { score: now, member: `${now}-${Math.random()}` });
+    await client.zAdd(redisKey, {
+      score: now,
+      member: `${now}-${Math.random()}`,
+    });
 
     // Set key expiry
     await client.expire(redisKey, Math.ceil(windowMs / 1000));

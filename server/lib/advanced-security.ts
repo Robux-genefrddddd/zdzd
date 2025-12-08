@@ -37,7 +37,9 @@ export class AdvancedSecurityService {
       const trustedIPs = data.trustedIPs || [];
 
       // Check if IP already in whitelist
-      const existingIP = trustedIPs.find((entry: any) => entry.ip === ipAddress);
+      const existingIP = trustedIPs.find(
+        (entry: any) => entry.ip === ipAddress,
+      );
 
       if (existingIP) {
         // Update last seen
@@ -102,13 +104,10 @@ export class AdvancedSecurityService {
     const db = getAdminDb();
     if (!db) throw new Error("Database not initialized");
 
-    await db
-      .collection("admin_ip_whitelist")
-      .doc(adminId)
-      .update({
-        enableIPRestriction: true,
-        updatedAt: Timestamp.now(),
-      });
+    await db.collection("admin_ip_whitelist").doc(adminId).update({
+      enableIPRestriction: true,
+      updatedAt: Timestamp.now(),
+    });
   }
 
   /**
@@ -118,13 +117,10 @@ export class AdvancedSecurityService {
     const db = getAdminDb();
     if (!db) throw new Error("Database not initialized");
 
-    await db
-      .collection("admin_ip_whitelist")
-      .doc(adminId)
-      .update({
-        enableIPRestriction: false,
-        updatedAt: Timestamp.now(),
-      });
+    await db.collection("admin_ip_whitelist").doc(adminId).update({
+      enableIPRestriction: false,
+      updatedAt: Timestamp.now(),
+    });
   }
 
   /**
@@ -298,9 +294,7 @@ export class AdvancedSecurityService {
   /**
    * Get admin security profile
    */
-  static async getAdminSecurityProfile(
-    adminId: string,
-  ): Promise<{
+  static async getAdminSecurityProfile(adminId: string): Promise<{
     adminId: string;
     ipRestrictionEnabled: boolean;
     trustedIPs: any[];

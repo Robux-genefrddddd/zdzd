@@ -200,9 +200,7 @@ describe("Admin Routes Security Tests", () => {
     it("should set Content-Security-Policy header", async () => {
       const response = await (app as any).test().get("/api/ping");
 
-      expect(
-        response.headers["x-content-security-policy"],
-      ).toBeDefined();
+      expect(response.headers["x-content-security-policy"]).toBeDefined();
     });
   });
 
@@ -259,7 +257,9 @@ describe("Admin API Endpoints Functionality Tests", () => {
       });
 
       expect(response.status).toBe(401);
-      expect(response.headers.get("content-type")).toContain("application/json");
+      expect(response.headers.get("content-type")).toContain(
+        "application/json",
+      );
     });
 
     it("POST /api/admin/promote-user - endpoint should exist", async () => {

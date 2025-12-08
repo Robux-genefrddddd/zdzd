@@ -22,8 +22,16 @@ pnpm add --save-dev @types/redis
 Add the following imports at the top of `createServer()`:
 
 ```typescript
-import { initializeSentry, captureException, addBreadcrumb } from "./lib/sentry-integration";
-import { initializeRateLimiter, checkRateLimit, closeRateLimiter } from "./lib/rate-limiter";
+import {
+  initializeSentry,
+  captureException,
+  addBreadcrumb,
+} from "./lib/sentry-integration";
+import {
+  initializeRateLimiter,
+  checkRateLimit,
+  closeRateLimiter,
+} from "./lib/rate-limiter";
 import { MonitoringService } from "./lib/monitoring-service";
 ```
 
@@ -42,14 +50,14 @@ await initializeRateLimiter();
 MonitoringService.startBackgroundMonitoring();
 
 // Add graceful shutdown
-process.on('SIGTERM', async () => {
-  console.log('SIGTERM received, shutting down gracefully...');
+process.on("SIGTERM", async () => {
+  console.log("SIGTERM received, shutting down gracefully...");
   await closeRateLimiter();
   process.exit(0);
 });
 
-process.on('SIGINT', async () => {
-  console.log('SIGINT received, shutting down gracefully...');
+process.on("SIGINT", async () => {
+  console.log("SIGINT received, shutting down gracefully...");
   await closeRateLimiter();
   process.exit(0);
 });
@@ -69,19 +77,19 @@ With:
 // Use production-ready rate limiter
 app.use(async (req, res, next) => {
   try {
-    const identifier = (req as any).decodedUid 
+    const identifier = (req as any).decodedUid
       ? `uid:${(req as any).decodedUid}`
       : `ip:${req.ip || req.socket.remoteAddress}`;
-    
+
     const result = await checkRateLimit(identifier, 100, 60000);
-    
+
     if (!result.allowed) {
       return res.status(429).json({
         error: "Too many requests. Please try again later.",
         retryAfter: result.retryAfter,
       });
     }
-    
+
     (req as any).rateLimitRemaining = result.remaining;
     next();
   } catch (error) {
@@ -96,7 +104,11 @@ app.use(async (req, res, next) => {
 
 ```typescript
 // Stricter rate limiting for admin operations
-const adminRateLimit = async (req: Request, res: Response, next: NextFunction) => {
+const adminRateLimit = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const adminId = (req as any).decodedUid;
     if (!adminId) {
@@ -106,7 +118,7 @@ const adminRateLimit = async (req: Request, res: Response, next: NextFunction) =
     const result = await checkRateLimit(
       `admin:${adminId}`,
       10, // 10 requests
-      60000 // per minute
+      60000, // per minute
     );
 
     if (!result.allowed) {
@@ -142,7 +154,7 @@ app.use(
     _next: express.NextFunction,
   ) => {
     console.error("Unhandled error:", err);
-    
+
     // Capture to Sentry
     const errorMessage = err instanceof Error ? err.message : String(err);
     captureException(err, {
@@ -152,15 +164,10 @@ app.use(
     });
 
     // Add breadcrumb
-    addBreadcrumb(
-      `Error on ${req.method} ${req.url}`,
-      "error",
-      "error",
-      {
-        statusCode: 500,
-        message: errorMessage,
-      }
-    );
+    addBreadcrumb(`Error on ${req.method} ${req.url}`, "error", "error", {
+      statusCode: 500,
+      message: errorMessage,
+    });
 
     res.status(500).json({
       error: "Internal server error",
@@ -177,7 +184,11 @@ app.use(
 #### Capture Custom Events
 
 ```typescript
-import { captureMessage, setTags, addBreadcrumb } from "./lib/sentry-integration";
+import {
+  captureMessage,
+  setTags,
+  addBreadcrumb,
+} from "./lib/sentry-integration";
 
 // In admin action handlers:
 captureMessage("Admin action performed", "info", {
@@ -191,18 +202,19 @@ setTags({
   adminAction: "promote_user",
 });
 
-addBreadcrumb(
-  "User promoted",
-  "admin",
-  "info",
-  { adminId: userId, targetId: targetId }
-);
+addBreadcrumb("User promoted", "admin", "info", {
+  adminId: userId,
+  targetId: targetId,
+});
 ```
 
 #### Report Suspicious Activity
 
 ```typescript
-import { reportSuspiciousActivity, reportRateLimitAbuse } from "./lib/sentry-integration";
+import {
+  reportSuspiciousActivity,
+  reportRateLimitAbuse,
+} from "./lib/sentry-integration";
 
 // In rate limit exceeded handler:
 reportRateLimitAbuse(userId, req.path, requestCount);
@@ -232,7 +244,7 @@ app.get("/api/admin/check-collections", async (req, res) => {
     MonitoringService.checkUsersSize(),
     MonitoringService.checkLicensesSize(),
   ]);
-  
+
   res.json({
     admin_logs: logs,
     users: users,
@@ -246,7 +258,7 @@ app.get("/api/admin/detect-anomalies", async (req, res) => {
     MonitoringService.detectSuspiciousActivity(),
     MonitoringService.detectAnomalousAdmins(),
   ]);
-  
+
   res.json({
     suspiciousActivities: activities,
     anomalousAdmins: admins,
@@ -260,22 +272,19 @@ app.get("/api/admin/detect-anomalies", async (req, res) => {
 import { AdvancedSecurityService } from "./lib/advanced-security";
 
 // In admin authentication middleware:
-const isIPTrusted = await AdvancedSecurityService.isIPTrusted(
-  adminId,
-  req.ip!
-);
+const isIPTrusted = await AdvancedSecurityService.isIPTrusted(adminId, req.ip!);
 
 if (!isIPTrusted) {
   // Require 2FA
   const { code, expiresAt } = AdvancedSecurityService.generateTwoFactorCode();
-  
+
   await AdvancedSecurityService.store2FACode(
     adminId,
     code,
     expiresAt,
-    "critical_action"
+    "critical_action",
   );
-  
+
   // Send code to admin (email/SMS)
   // Require code in next request
 }
@@ -285,17 +294,20 @@ await AdvancedSecurityService.logCriticalAction(
   adminId,
   "DELETE_USER",
   req.ip!,
-  { 
+  {
     targetUser: targetId,
     userAgent: req.get("user-agent"),
-  }
+  },
 );
 
 // Check admin behavior
 const behavior = await AdvancedSecurityService.checkAdminBehavior(adminId);
 if (behavior.isSuspicious) {
   // Alert admin or restrict access
-  console.warn(`Suspicious behavior detected for admin ${adminId}:`, behavior.reasons);
+  console.warn(
+    `Suspicious behavior detected for admin ${adminId}:`,
+    behavior.reasons,
+  );
 }
 ```
 

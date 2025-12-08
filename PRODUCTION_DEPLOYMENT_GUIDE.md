@@ -19,6 +19,7 @@ Complete guide to deploy the admin panel system to production with full security
 ## Pre-Deployment Checklist
 
 ### Infrastructure
+
 - [ ] Production Firebase project created
 - [ ] Cloud Firestore database enabled
 - [ ] Firebase Authentication enabled
@@ -29,6 +30,7 @@ Complete guide to deploy the admin panel system to production with full security
 - [ ] Domain name configured with DNS
 
 ### Code & Configuration
+
 - [ ] All tests passing (`npm run test`)
 - [ ] TypeScript type checking passes (`npm run typecheck`)
 - [ ] Build succeeds (`npm run build`)
@@ -38,6 +40,7 @@ Complete guide to deploy the admin panel system to production with full security
 - [ ] .env file not committed to repository
 
 ### Security
+
 - [ ] CORS origins configured
 - [ ] Rate limiting configured
 - [ ] Security headers validated
@@ -75,6 +78,7 @@ firebase deploy --only firestore:indexes
 ```
 
 Or manually create indexes in Firebase Console:
+
 - Go to Cloud Firestore → Indexes
 - Create composite indexes for:
   - `admin_logs`: timestamp (DESC)
@@ -94,6 +98,7 @@ Or manually create indexes in Firebase Console:
 4. Convert to base64 or individual environment variables
 
 **For base64:**
+
 ```bash
 cat service-account.json | base64 | tr -d '\n'
 ```
@@ -111,11 +116,13 @@ cp .env.example .env.production
 ### Step 2: Configure Firebase Credentials
 
 **Option A: Base64 JSON (Recommended)**
+
 ```env
 FIREBASE_SERVICE_ACCOUNT_KEY='{"type":"service_account",...}'
 ```
 
 **Option B: Individual Variables**
+
 ```env
 FIREBASE_PROJECT_ID=your-project-id
 FIREBASE_PRIVATE_KEY_ID=xxx
@@ -151,6 +158,7 @@ RATE_LIMIT_AI_CHAT=10
 ```
 
 **To set up Redis:**
+
 - Use AWS ElastiCache, Azure Cache for Redis, or self-hosted
 - Ensure Redis supports persistence (RDB/AOF)
 - Configure backup strategy
@@ -165,6 +173,7 @@ SENTRY_TRACES_SAMPLE_RATE=0.1
 ```
 
 **To set up Sentry:**
+
 1. Create account at [sentry.io](https://sentry.io)
 2. Create a new project (Node.js)
 3. Copy DSN value
@@ -210,27 +219,28 @@ Create `validate-env.ts`:
 
 ```typescript
 const requiredVars = [
-  'FIREBASE_PROJECT_ID',
-  'CORS_ORIGINS',
-  'APP_URL',
-  'NODE_ENV',
+  "FIREBASE_PROJECT_ID",
+  "CORS_ORIGINS",
+  "APP_URL",
+  "NODE_ENV",
 ];
 
-const missingVars = requiredVars.filter(v => !process.env[v]);
+const missingVars = requiredVars.filter((v) => !process.env[v]);
 
 if (missingVars.length > 0) {
-  console.error('Missing environment variables:', missingVars);
+  console.error("Missing environment variables:", missingVars);
   process.exit(1);
 }
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   console.warn('NODE_ENV is not "production"');
 }
 
-console.log('✓ Environment validation passed');
+console.log("✓ Environment validation passed");
 ```
 
 Run validation before starting:
+
 ```bash
 node validate-env.ts && npm run start
 ```
@@ -242,6 +252,7 @@ node validate-env.ts && npm run start
 ### 1. HTTPS/TLS
 
 **Nginx Configuration:**
+
 ```nginx
 server {
     listen 443 ssl http2;
@@ -290,6 +301,7 @@ ufw enable
 ### 3. Admin Access Control
 
 **IP Whitelisting (optional):**
+
 ```nginx
 # Restrict admin panel to specific IPs
 location /api/admin/ {
@@ -319,14 +331,15 @@ The system includes built-in monitoring:
 
 ```typescript
 // Start monitoring on server startup
-import { MonitoringService } from './lib/monitoring-service';
-import { initializeSentry } from './lib/sentry-integration';
+import { MonitoringService } from "./lib/monitoring-service";
+import { initializeSentry } from "./lib/sentry-integration";
 
 initializeSentry(app);
 MonitoringService.startBackgroundMonitoring();
 ```
 
 This automatically:
+
 - Enforces log retention (90 days by default)
 - Detects suspicious activities
 - Identifies anomalous admin behavior
@@ -337,6 +350,7 @@ This automatically:
 Configure log aggregation:
 
 **Using ELK Stack:**
+
 ```bash
 # Filebeat config
 filebeat install service
@@ -345,6 +359,7 @@ filebeat modules enable docker  # If containerized
 ```
 
 **Using Cloud Logging (GCP):**
+
 ```bash
 gcloud logging write admin-panel "Application started" --severity=INFO
 ```
@@ -352,6 +367,7 @@ gcloud logging write admin-panel "Application started" --severity=INFO
 ### 3. Sentry Monitoring
 
 Automatically monitors:
+
 - Unhandled exceptions
 - Failed API requests
 - Performance degradation
@@ -361,6 +377,7 @@ Automatically monitors:
 ### 4. Database Monitoring
 
 Set up Firestore alerts:
+
 1. Console → Alerts
 2. Create alert for:
    - `admin_logs` collection size > 100,000 docs
@@ -529,6 +546,7 @@ done
 **Problem:** "Firebase Admin SDK not initialized"
 
 **Solution:**
+
 ```bash
 # Verify credentials
 echo $FIREBASE_SERVICE_ACCOUNT_KEY | base64 -d | jq .
@@ -542,6 +560,7 @@ firebase deploy --only firestore:rules
 **Problem:** "All requests blocked (429)"
 
 **Solution:**
+
 ```bash
 # Check Redis connection
 redis-cli ping
@@ -560,6 +579,7 @@ redis-cli INFO memory
 **Problem:** "Unauthorized: Not an admin"
 
 **Solution:**
+
 1. Verify user exists in Firestore with `isAdmin: true`
 2. Check custom claims in Firebase Auth: `setCustomUserClaims(uid, {admin: true})`
 3. Verify token is not expired
@@ -569,6 +589,7 @@ redis-cli INFO memory
 **Problem:** In-memory rate limiter consuming too much memory
 
 **Solution:**
+
 1. Configure Redis: `REDIS_URL=redis://...`
 2. Restart server: `pm2 restart admin-panel`
 3. Monitor: `pm2 monit`
@@ -578,6 +599,7 @@ redis-cli INFO memory
 **Problem:** Admin endpoints responding slowly
 
 **Solution:**
+
 1. Check Firestore indexes are created
 2. Monitor query complexity in Firestore console
 3. Check Sentry for slow operations
@@ -588,6 +610,7 @@ redis-cli INFO memory
 **Problem:** Logs filling up disk
 
 **Solution:**
+
 ```bash
 # Configure log rotation
 apt-get install logrotate
@@ -608,22 +631,26 @@ apt-get install logrotate
 ## Maintenance Schedule
 
 ### Daily
+
 - Monitor Sentry for new errors
 - Check admin_logs collection size
 - Review suspicious activity alerts
 
 ### Weekly
+
 - Review admin access logs
 - Check rate limiting effectiveness
 - Verify backups are working
 
 ### Monthly
+
 - Security audit of admin operations
 - Review and update IP whitelists
 - Performance optimization review
 - Update dependencies
 
 ### Quarterly
+
 - Full security assessment
 - Disaster recovery drill
 - Capacity planning review

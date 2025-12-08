@@ -14,8 +14,11 @@ export function initializeSentry(app?: Express) {
 
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
-    environment: process.env.NODE_ENV || process.env.SENTRY_ENVIRONMENT || "production",
-    tracesSampleRate: parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE || "0.1"),
+    environment:
+      process.env.NODE_ENV || process.env.SENTRY_ENVIRONMENT || "production",
+    tracesSampleRate: parseFloat(
+      process.env.SENTRY_TRACES_SAMPLE_RATE || "0.1",
+    ),
     maxBreadcrumbs: 50,
     attachStacktrace: true,
     denyUrls: [
@@ -149,10 +152,15 @@ export function reportCollectionSize(
       },
     );
   } else {
-    addBreadcrumb(`Collection size check: ${collectionName}`, "database", "info", {
-      collection: collectionName,
-      size,
-    });
+    addBreadcrumb(
+      `Collection size check: ${collectionName}`,
+      "database",
+      "info",
+      {
+        collection: collectionName,
+        size,
+      },
+    );
   }
 }
 

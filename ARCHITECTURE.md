@@ -304,18 +304,21 @@ Sentry triggers alert rules:
 ## Security Boundaries
 
 ### Client Side (Trusted User)
+
 - Can only access own profile (read)
 - Cannot modify isAdmin or isBanned fields
 - Cannot access admin panel (unauthorized redirect)
 - Cannot call admin endpoints
 
 ### Server Side (Trusted Service)
+
 - Has full access to Firestore Admin SDK
 - Can read/write all collections
 - Can bypass Firestore rules
 - Protected by HTTPS + Bearer token validation
 
 ### Database (Rules Enforced)
+
 - Admins can read all users
 - Admins can read/write admin_logs
 - Admins can manage licenses
@@ -362,26 +365,31 @@ messages/{messageId}/
 ## Error Handling & Recovery
 
 ### Network Errors
+
 - Automatic retry with exponential backoff
 - User notification after 3 failed attempts
 - Offline mode support for read operations
 
 ### Authentication Errors
+
 - 401: Invalid/expired token → Force re-login
 - 403: Not authorized → Show access denied
 - Server handles token refresh automatically
 
 ### Validation Errors
+
 - 400: Malformed request → Show field-specific errors
 - Client-side validation before submission
 - Server-side validation always enforced
 
 ### Rate Limiting
+
 - 429: Too many requests
 - Includes Retry-After header
 - Client should back off and retry
 
 ### Server Errors
+
 - 500: Unhandled exception
 - Logged to Sentry with context
 - Generic error message to client
@@ -390,23 +398,27 @@ messages/{messageId}/
 ## Performance Considerations
 
 ### Pagination
+
 - User list: 100 users per page
 - License list: 100 items per page
 - Logs: 100 entries per page
 - Firestore startAfter() for cursor pagination
 
 ### Caching
+
 - AI config cached in-memory (5 min TTL)
 - System stats cached (1 min TTL)
 - Admin IP whitelist cached (10 min TTL)
 
 ### Rate Limiting
+
 - Per-user tracking in Redis
 - Sliding window algorithm (more accurate than fixed window)
 - Fail-open if Redis unavailable
 - Memory cleanup every 1 hour
 
 ### Database Indexes
+
 - Composite indexes for complex queries
 - Timestamp descending for recent-first queries
 - Status fields (isBanned, isAdmin) for filtering
@@ -414,18 +426,21 @@ messages/{messageId}/
 ## Backup & Disaster Recovery
 
 ### Firestore Backups
+
 - Automated daily backups via Cloud Tasks
 - Export to Cloud Storage
 - 30-day retention
 - Restore capability in < 1 hour
 
 ### Redis Backups
+
 - AOF (Append-Only File) persistence
 - RDB snapshots hourly
 - Replication to standby instance
 - Recovery < 5 minutes
 
 ### Logs Archival
+
 - Old logs (>90 days) auto-deleted
 - Before deletion, archived to Cloud Storage
 - Long-term retention for compliance
@@ -433,17 +448,20 @@ messages/{messageId}/
 ## Scalability
 
 ### Firestore
+
 - Auto-scales to millions of reads/writes
 - Optimized with proper indexes
 - Document limits: 100 subcollections per doc
 - Query complexity monitoring
 
 ### Rate Limiting
+
 - Redis cluster mode for horizontal scaling
 - Sharded by user UID or IP
 - Consistent hashing for distribution
 
 ### Admin Operations
+
 - Batch operations via transactions
 - Async background tasks for heavy operations
 - Progress tracking for long-running tasks

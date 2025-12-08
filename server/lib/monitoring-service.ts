@@ -6,8 +6,9 @@ import { reportCollectionSize } from "./sentry-integration";
  * Service for monitoring admin logs, collection sizes, and generating alerts
  */
 export class MonitoringService {
-  private static logRetentionDays =
-    parseInt(process.env.LOG_RETENTION_DAYS || "90");
+  private static logRetentionDays = parseInt(
+    process.env.LOG_RETENTION_DAYS || "90",
+  );
   private static collectionCheckInterval = 3600000; // 1 hour
   private static lastCheck: Record<string, number> = {};
 
@@ -249,14 +250,19 @@ export class MonitoringService {
     suspiciousActivities: Array<{ type: string; details: any }>;
     anomalousAdmins: Array<{ adminId: string; anomalies: string[] }>;
   }> {
-    const [adminLogsSize, usersSize, licensesSize, suspiciousActivities, anomalousAdmins] =
-      await Promise.all([
-        this.checkAdminLogsSize(),
-        this.checkUsersSize(),
-        this.checkLicensesSize(),
-        this.detectSuspiciousActivity(),
-        this.detectAnomalousAdmins(),
-      ]);
+    const [
+      adminLogsSize,
+      usersSize,
+      licensesSize,
+      suspiciousActivities,
+      anomalousAdmins,
+    ] = await Promise.all([
+      this.checkAdminLogsSize(),
+      this.checkUsersSize(),
+      this.checkLicensesSize(),
+      this.detectSuspiciousActivity(),
+      this.detectAnomalousAdmins(),
+    ]);
 
     return {
       timestamp: new Date(),
@@ -274,37 +280,46 @@ export class MonitoringService {
    */
   static startBackgroundMonitoring() {
     // Run log retention check every 6 hours
-    setInterval(async () => {
-      try {
-        await this.enforceLogRetention();
-      } catch (error) {
-        console.error("Log retention check failed:", error);
-      }
-    }, 6 * 60 * 60 * 1000);
+    setInterval(
+      async () => {
+        try {
+          await this.enforceLogRetention();
+        } catch (error) {
+          console.error("Log retention check failed:", error);
+        }
+      },
+      6 * 60 * 60 * 1000,
+    );
 
     // Run suspicious activity detection every 10 minutes
-    setInterval(async () => {
-      try {
-        const activities = await this.detectSuspiciousActivity();
-        if (activities.length > 0) {
-          console.warn("Suspicious activities detected:", activities);
+    setInterval(
+      async () => {
+        try {
+          const activities = await this.detectSuspiciousActivity();
+          if (activities.length > 0) {
+            console.warn("Suspicious activities detected:", activities);
+          }
+        } catch (error) {
+          console.error("Suspicious activity detection failed:", error);
         }
-      } catch (error) {
-        console.error("Suspicious activity detection failed:", error);
-      }
-    }, 10 * 60 * 1000);
+      },
+      10 * 60 * 1000,
+    );
 
     // Run anomalous admin detection every hour
-    setInterval(async () => {
-      try {
-        const anomalous = await this.detectAnomalousAdmins();
-        if (anomalous.length > 0) {
-          console.warn("Anomalous admin activities detected:", anomalous);
+    setInterval(
+      async () => {
+        try {
+          const anomalous = await this.detectAnomalousAdmins();
+          if (anomalous.length > 0) {
+            console.warn("Anomalous admin activities detected:", anomalous);
+          }
+        } catch (error) {
+          console.error("Anomalous admin detection failed:", error);
         }
-      } catch (error) {
-        console.error("Anomalous admin detection failed:", error);
-      }
-    }, 60 * 60 * 1000);
+      },
+      60 * 60 * 1000,
+    );
 
     console.log("Background monitoring tasks started");
   }
