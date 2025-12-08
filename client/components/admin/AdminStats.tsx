@@ -5,16 +5,17 @@ import { dsClasses } from "@/lib/design-system";
 
 interface SystemStats {
   totalUsers: number;
-  totalAdmins: number;
+  adminUsers: number;
   bannedUsers: number;
   activeLicenses: number;
-  systemHealth: string;
-  uptime: number;
-  avgLatency: number;
-  storage: {
-    used: number;
-    total: number;
-  };
+  totalMessages: number;
+  avgMessagesPerUser: number;
+  totalLicenses: number;
+  usedLicenses: number;
+  activityLogsCount: number;
+  freeUsers: number;
+  proUsers: number;
+  activityByDay: Record<string, number>;
 }
 
 interface StatCardProps {
