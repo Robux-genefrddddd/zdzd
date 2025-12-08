@@ -5,16 +5,17 @@ import { dsClasses } from "@/lib/design-system";
 
 interface SystemStats {
   totalUsers: number;
-  totalAdmins: number;
+  adminUsers: number;
   bannedUsers: number;
   activeLicenses: number;
-  systemHealth: string;
-  uptime: number;
-  avgLatency: number;
-  storage: {
-    used: number;
-    total: number;
-  };
+  totalMessages: number;
+  avgMessagesPerUser: number;
+  totalLicenses: number;
+  usedLicenses: number;
+  activityLogsCount: number;
+  freeUsers: number;
+  proUsers: number;
+  activityByDay: Record<string, number>;
 }
 
 interface StatCardProps {
@@ -133,7 +134,7 @@ export default function AdminStats() {
         />
         <StatCard
           title="Administrateurs"
-          value={stats.totalAdmins}
+          value={stats.adminUsers}
           lastUpdated="Mise à jour en temps réel"
         />
         <StatCard
@@ -153,57 +154,46 @@ export default function AdminStats() {
         <div className={`${dsClasses.card} p-4 space-y-3`}>
           <div className="flex items-center justify-between">
             <span className="text-white/70 text-12px font-medium uppercase">
-              Santé système
+              Messages utilisateurs
             </span>
-            <span
-              className={`text-12px font-semibold ${stats.systemHealth === "Optimal" ? "text-emerald-400" : "text-amber-400"}`}
-            >
-              {stats.systemHealth}
+            <span className="text-emerald-400 text-12px font-semibold">
+              {stats.totalMessages}
             </span>
           </div>
           <p className="text-12px text-white/70">
-            Uptime: {stats.uptime.toFixed(2)}% • Latence: {stats.avgLatency}ms
+            Moyenne: {stats.avgMessagesPerUser} par utilisateur
           </p>
-          <p className="text-11px text-white/40">Statut optimal</p>
+          <p className="text-11px text-white/40">Total envoyés</p>
         </div>
 
         <div className={`${dsClasses.card} p-4 space-y-3`}>
           <div className="flex items-center justify-between">
             <span className="text-white/70 text-12px font-medium uppercase">
-              Requêtes API
+              Distribution des licences
             </span>
             <span className="text-emerald-400 text-12px font-semibold">
-              Actif
+              {Math.round((stats.usedLicenses / stats.totalLicenses) * 100)}%
             </span>
           </div>
-          <p className="text-12px text-white/70">Performance: Normal</p>
-          <p className="text-11px text-white/40">Aucune alerte</p>
+          <p className="text-12px text-white/70">
+            Utilisées: {stats.usedLicenses} / {stats.totalLicenses}
+          </p>
+          <p className="text-11px text-white/40">Taux d'utilisation</p>
         </div>
 
         <div className={`${dsClasses.card} p-4 space-y-3`}>
           <div className="flex items-center justify-between">
             <span className="text-white/70 text-12px font-medium uppercase">
-              Stockage
+              Distribution des plans
             </span>
-            <span
-              className={`text-12px font-semibold ${storagePercent > 80 ? "text-amber-400" : "text-emerald-400"}`}
-            >
-              {storagePercent}%
+            <span className="text-emerald-400 text-12px font-semibold">
+              {stats.freeUsers + stats.proUsers}
             </span>
           </div>
-          <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
-            <div
-              className={`h-full transition-all duration-300 ${
-                storagePercent > 80
-                  ? "bg-gradient-to-r from-amber-500/60 to-amber-400/40"
-                  : "bg-gradient-to-r from-emerald-500/60 to-emerald-400/40"
-              }`}
-              style={{ width: `${storagePercent}%` }}
-            />
-          </div>
-          <p className="text-11px text-white/40">
-            {stats.storage.used} GB / {stats.storage.total} GB
+          <p className="text-12px text-white/70">
+            Gratuit: {stats.freeUsers} • Premium: {stats.proUsers}
           </p>
+          <p className="text-11px text-white/40">Utilisateurs actifs</p>
         </div>
       </div>
     </div>
