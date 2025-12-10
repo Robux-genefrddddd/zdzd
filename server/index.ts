@@ -176,40 +176,46 @@ export function createServer(isDev: boolean = false) {
   // Serve static files from public directory
   app.use(express.static("public"));
 
-  // SPA fallback - serve index.html for all non-API, non-static routes
-  // This allows React Router to handle client-side routing
-  app.get("*", (req, res) => {
-    const indexPath = "dist/spa/index.html";
-    const fs = require("fs");
-
-    if (fs.existsSync(indexPath)) {
-      // In production mode - serve the built SPA
-      res.sendFile(indexPath, { root: process.cwd() });
-    } else {
-      // In development mode with Vite dev server - return 404
-      // (Vite will handle serving index.html for routes)
-      res.status(404).json({
-        success: false,
-        error: "Not found",
-      });
-    }
-  });
-
-  // Error handler
+  // Error handler (for API errors)
   app.use(
     (
       err: unknown,
-      _req: express.Request,
+      req: express.Request,
       res: express.Response,
-      _next: express.NextFunction,
+      next: express.NextFunction,
     ) => {
-      console.error("Unhandled error:", err);
-      res.status(500).json({
-        success: false,
-        error: "Internal server error",
-      });
+      // Only handle errors for API routes
+      if (req.path.startsWith("/api")) {
+        console.error("Unhandled error:", err);
+        res.status(500).json({
+          success: false,
+          error: "Internal server error",
+        });
+      } else {
+        next(err);
+      }
     },
   );
+
+  // SPA fallback for non-API routes
+  // Serve index.html for all other requests to enable client-side routing
+  app.get("*", (req, res) => {
+    // For production builds, serve dist/spa/index.html
+    const fs = require("fs");
+    const path = require("path");
+    const indexPath = path.join(process.cwd(), "dist/spa/index.html");
+
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      // In development, Vite handles this through its own middleware
+      // Return a message indicating the dev server should handle it
+      res.status(404).json({
+        success: false,
+        error: "Not found - are you running in development mode? Make sure to use `npm run dev`",
+      });
+    }
+  });
 
   return app;
 }
