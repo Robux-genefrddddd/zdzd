@@ -60,7 +60,8 @@ export const handleActivateLicense: RequestHandler = async (req, res) => {
       message: "License activated successfully",
       data: {
         plan: license.plan,
-        messagesLimit: license.plan === "Pro" ? 1000 : license.plan === "Classic" ? 100 : 10,
+        messagesLimit:
+          license.plan === "Pro" ? 1000 : license.plan === "Classic" ? 100 : 10,
       },
     });
   } catch (error) {

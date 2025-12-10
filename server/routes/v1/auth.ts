@@ -30,7 +30,7 @@ export const handleRegister: RequestHandler = async (req, res) => {
     const { email, password } = RegisterSchema.parse(req.body);
 
     const auth = getAuth_();
-    
+
     // Create user in Firebase Auth
     const userRecord = await auth.createUser({
       email,
@@ -130,7 +130,10 @@ export const handleVerifyToken: RequestHandler = async (req, res) => {
     }
 
     if (error instanceof Error) {
-      if (error.message.includes("invalid") || error.message.includes("expired")) {
+      if (
+        error.message.includes("invalid") ||
+        error.message.includes("expired")
+      ) {
         return res.status(401).json({
           success: false,
           error: "Invalid or expired token",
@@ -152,9 +155,11 @@ export const handleVerifyToken: RequestHandler = async (req, res) => {
 // Get current user (via token in header)
 export const handleGetCurrentUser: RequestHandler = async (req, res) => {
   try {
-    const idToken = req.body?.idToken || (req.headers.authorization?.startsWith("Bearer ")
-      ? req.headers.authorization.slice(7)
-      : null);
+    const idToken =
+      req.body?.idToken ||
+      (req.headers.authorization?.startsWith("Bearer ")
+        ? req.headers.authorization.slice(7)
+        : null);
 
     if (!idToken) {
       return res.status(401).json({
@@ -179,7 +184,10 @@ export const handleGetCurrentUser: RequestHandler = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    if (error instanceof Error && (error.message.includes("invalid") || error.message.includes("expired"))) {
+    if (
+      error instanceof Error &&
+      (error.message.includes("invalid") || error.message.includes("expired"))
+    ) {
       return res.status(401).json({
         success: false,
         error: "Invalid or expired token",

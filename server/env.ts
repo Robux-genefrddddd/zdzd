@@ -42,16 +42,12 @@ function loadEnv(): EnvConfig {
     try {
       firebaseConfig = JSON.parse(firebaseServiceAccountKey);
     } catch {
-      console.error(
-        "❌ FIREBASE_SERVICE_ACCOUNT_KEY must be valid JSON",
-      );
+      console.error("❌ FIREBASE_SERVICE_ACCOUNT_KEY must be valid JSON");
       process.exit(1);
     }
 
     if (!firebaseConfig.project_id) {
-      console.error(
-        "❌ FIREBASE_SERVICE_ACCOUNT_KEY missing project_id",
-      );
+      console.error("❌ FIREBASE_SERVICE_ACCOUNT_KEY missing project_id");
       process.exit(1);
     }
 

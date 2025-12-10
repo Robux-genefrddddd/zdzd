@@ -36,10 +36,7 @@ export class UserRepository {
       createdAt: now,
     };
 
-    await getDB()
-      .collection("users")
-      .doc(uid)
-      .set(user);
+    await getDB().collection("users").doc(uid).set(user);
 
     return user;
   }
@@ -51,17 +48,11 @@ export class UserRepository {
   }
 
   static async updateUser(uid: string, data: Partial<User>): Promise<void> {
-    await getDB()
-      .collection("users")
-      .doc(uid)
-      .update(data);
+    await getDB().collection("users").doc(uid).update(data);
   }
 
   static async getAllUsers(limit = 100): Promise<User[]> {
-    const snapshot = await getDB()
-      .collection("users")
-      .limit(limit)
-      .get();
+    const snapshot = await getDB().collection("users").limit(limit).get();
 
     return snapshot.docs.map((doc) => doc.data() as User);
   }
@@ -70,23 +61,17 @@ export class UserRepository {
     uid: string,
     messagesUsed: number,
   ): Promise<void> {
-    await getDB()
-      .collection("users")
-      .doc(uid)
-      .update({
-        messagesUsed,
-        lastMessageAt: Timestamp.now(),
-      });
+    await getDB().collection("users").doc(uid).update({
+      messagesUsed,
+      lastMessageAt: Timestamp.now(),
+    });
   }
 
   static async resetUserMessages(uid: string): Promise<void> {
-    await getDB()
-      .collection("users")
-      .doc(uid)
-      .update({
-        messagesUsed: 0,
-        lastMessageReset: Timestamp.now(),
-      });
+    await getDB().collection("users").doc(uid).update({
+      messagesUsed: 0,
+      lastMessageReset: Timestamp.now(),
+    });
   }
 
   static async banUser(
@@ -94,27 +79,21 @@ export class UserRepository {
     reason: string,
     bannedBy: string,
   ): Promise<void> {
-    await getDB()
-      .collection("users")
-      .doc(uid)
-      .update({
-        isBanned: true,
-        bannedReason: reason,
-        bannedAt: Timestamp.now(),
-        bannedBy,
-      });
+    await getDB().collection("users").doc(uid).update({
+      isBanned: true,
+      bannedReason: reason,
+      bannedAt: Timestamp.now(),
+      bannedBy,
+    });
   }
 
   static async unbanUser(uid: string): Promise<void> {
-    await getDB()
-      .collection("users")
-      .doc(uid)
-      .update({
-        isBanned: false,
-        bannedReason: null,
-        bannedAt: null,
-        bannedBy: null,
-      });
+    await getDB().collection("users").doc(uid).update({
+      isBanned: false,
+      bannedReason: null,
+      bannedAt: null,
+      bannedBy: null,
+    });
   }
 
   static async updateUserPlan(
@@ -127,31 +106,22 @@ export class UserRepository {
       Pro: 1000,
     };
 
-    await getDB()
-      .collection("users")
-      .doc(uid)
-      .update({
-        plan,
-        messagesLimit: limits[plan],
-      });
+    await getDB().collection("users").doc(uid).update({
+      plan,
+      messagesLimit: limits[plan],
+    });
   }
 
   static async promoteToAdmin(uid: string): Promise<void> {
-    await getDB()
-      .collection("users")
-      .doc(uid)
-      .update({
-        isAdmin: true,
-      });
+    await getDB().collection("users").doc(uid).update({
+      isAdmin: true,
+    });
   }
 
   static async demoteFromAdmin(uid: string): Promise<void> {
-    await getDB()
-      .collection("users")
-      .doc(uid)
-      .update({
-        isAdmin: false,
-      });
+    await getDB().collection("users").doc(uid).update({
+      isAdmin: false,
+    });
   }
 
   static async deleteUser(uid: string): Promise<void> {
@@ -168,11 +138,8 @@ export class UserRepository {
   }
 
   static async recordLogin(uid: string): Promise<void> {
-    await getDB()
-      .collection("users")
-      .doc(uid)
-      .update({
-        lastLoginAt: Timestamp.now(),
-      });
+    await getDB().collection("users").doc(uid).update({
+      lastLoginAt: Timestamp.now(),
+    });
   }
 }

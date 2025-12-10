@@ -43,14 +43,18 @@ export function initializeFirebase(): { db: Firestore; auth: Auth } {
 
 export function getDB(): Firestore {
   if (!db) {
-    throw new Error("Firebase not initialized. Call initializeFirebase() first");
+    throw new Error(
+      "Firebase not initialized. Call initializeFirebase() first",
+    );
   }
   return db;
 }
 
 export function getAuth_(): Auth {
   if (!auth) {
-    throw new Error("Firebase Auth not initialized. Call initializeFirebase() first");
+    throw new Error(
+      "Firebase Auth not initialized. Call initializeFirebase() first",
+    );
   }
   return auth;
 }

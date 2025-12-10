@@ -124,31 +124,35 @@ export const handleSendMessage: RequestHandler = async (req, res) => {
     let aiResponse: string;
 
     try {
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": "https://app.example.com",
-          "X-Title": "VanIA Chat",
+      const response = await fetch(
+        "https://openrouter.ai/api/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://app.example.com",
+            "X-Title": "VanIA Chat",
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You are a helpful assistant. Respond in the user's language.",
+              },
+              ...conversationHistory,
+              {
+                role: "user",
+                content: userMessage,
+              },
+            ],
+            temperature,
+            max_tokens: maxTokens,
+          }),
         },
-        body: JSON.stringify({
-          model,
-          messages: [
-            {
-              role: "system",
-              content: "You are a helpful assistant. Respond in the user's language.",
-            },
-            ...conversationHistory,
-            {
-              role: "user",
-              content: userMessage,
-            },
-          ],
-          temperature,
-          max_tokens: maxTokens,
-        }),
-      });
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -160,7 +164,8 @@ export const handleSendMessage: RequestHandler = async (req, res) => {
       }
 
       const data = await response.json();
-      aiResponse = data.choices?.[0]?.message?.content || "No response generated";
+      aiResponse =
+        data.choices?.[0]?.message?.content || "No response generated";
     } catch (error) {
       console.error("AI service request failed:", error);
       return res.status(503).json({

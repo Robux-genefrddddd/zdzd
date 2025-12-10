@@ -47,7 +47,9 @@ export const handleGetAllUsers: RequestHandler = async (req, res) => {
     if (error instanceof Error && error.message.includes("Unauthorized")) {
       return res.status(403).json({ success: false, error: error.message });
     }
-    return res.status(500).json({ success: false, error: "Failed to fetch users" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to fetch users" });
   }
 };
 
@@ -81,7 +83,9 @@ export const handleBanUser: RequestHandler = async (req, res) => {
     if (error instanceof Error && error.message.includes("Unauthorized")) {
       return res.status(403).json({ success: false, error: error.message });
     }
-    return res.status(500).json({ success: false, error: "Failed to ban user" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to ban user" });
   }
 };
 
@@ -111,7 +115,9 @@ export const handleUnbanUser: RequestHandler = async (req, res) => {
     if (error instanceof Error && error.message.includes("Unauthorized")) {
       return res.status(403).json({ success: false, error: error.message });
     }
-    return res.status(500).json({ success: false, error: "Failed to unban user" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to unban user" });
   }
 };
 
@@ -141,7 +147,9 @@ export const handlePromoteToAdmin: RequestHandler = async (req, res) => {
     if (error instanceof Error && error.message.includes("Unauthorized")) {
       return res.status(403).json({ success: false, error: error.message });
     }
-    return res.status(500).json({ success: false, error: "Failed to promote user" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to promote user" });
   }
 };
 
@@ -171,7 +179,9 @@ export const handleDemoteFromAdmin: RequestHandler = async (req, res) => {
     if (error instanceof Error && error.message.includes("Unauthorized")) {
       return res.status(403).json({ success: false, error: error.message });
     }
-    return res.status(500).json({ success: false, error: "Failed to demote user" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to demote user" });
   }
 };
 
@@ -201,7 +211,9 @@ export const handleResetMessages: RequestHandler = async (req, res) => {
     if (error instanceof Error && error.message.includes("Unauthorized")) {
       return res.status(403).json({ success: false, error: error.message });
     }
-    return res.status(500).json({ success: false, error: "Failed to reset messages" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to reset messages" });
   }
 };
 
@@ -235,7 +247,9 @@ export const handleUpdateUserPlan: RequestHandler = async (req, res) => {
     if (error instanceof Error && error.message.includes("Unauthorized")) {
       return res.status(403).json({ success: false, error: error.message });
     }
-    return res.status(500).json({ success: false, error: "Failed to update user plan" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to update user plan" });
   }
 };
 
@@ -255,7 +269,9 @@ export const handleGetAIConfig: RequestHandler = async (req, res) => {
     if (error instanceof Error && error.message.includes("Unauthorized")) {
       return res.status(403).json({ success: false, error: error.message });
     }
-    return res.status(500).json({ success: false, error: "Failed to fetch AI config" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to fetch AI config" });
   }
 };
 
@@ -294,7 +310,9 @@ export const handleUpdateAIConfig: RequestHandler = async (req, res) => {
     if (error instanceof Error && error.message.includes("Unauthorized")) {
       return res.status(403).json({ success: false, error: error.message });
     }
-    return res.status(500).json({ success: false, error: "Failed to update AI config" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to update AI config" });
   }
 };
 
@@ -347,7 +365,9 @@ export const handleEnableMaintenance: RequestHandler = async (req, res) => {
     if (error instanceof Error && error.message.includes("Unauthorized")) {
       return res.status(403).json({ success: false, error: error.message });
     }
-    return res.status(500).json({ success: false, error: "Failed to enable maintenance" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to enable maintenance" });
   }
 };
 
@@ -375,7 +395,9 @@ export const handleDisableMaintenance: RequestHandler = async (req, res) => {
     if (error instanceof Error && error.message.includes("Unauthorized")) {
       return res.status(403).json({ success: false, error: error.message });
     }
-    return res.status(500).json({ success: false, error: "Failed to disable maintenance" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to disable maintenance" });
   }
 };
 
@@ -395,7 +417,9 @@ export const handleGetAdminLogs: RequestHandler = async (req, res) => {
     if (error instanceof Error && error.message.includes("Unauthorized")) {
       return res.status(403).json({ success: false, error: error.message });
     }
-    return res.status(500).json({ success: false, error: "Failed to fetch logs" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to fetch logs" });
   }
 };
 
@@ -425,7 +449,9 @@ export const handleClearOldLogs: RequestHandler = async (req, res) => {
     if (error instanceof Error && error.message.includes("Unauthorized")) {
       return res.status(403).json({ success: false, error: error.message });
     }
-    return res.status(500).json({ success: false, error: "Failed to clear logs" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to clear logs" });
   }
 };
 
@@ -458,6 +484,8 @@ export const handleGetStats: RequestHandler = async (req, res) => {
     if (error instanceof Error && error.message.includes("Unauthorized")) {
       return res.status(403).json({ success: false, error: error.message });
     }
-    return res.status(500).json({ success: false, error: "Failed to fetch statistics" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to fetch statistics" });
   }
 };

@@ -36,7 +36,8 @@ export class SettingsRepository {
         model: "openai/gpt-oss-120b:free",
         temperature: 0.7,
         maxTokens: 2048,
-        systemPrompt: "You are a helpful assistant. Always respond in the user's language.",
+        systemPrompt:
+          "You are a helpful assistant. Always respond in the user's language.",
       };
     }
 
@@ -63,10 +64,7 @@ export class SettingsRepository {
   }
 
   static async getMaintenanceStatus(): Promise<MaintenanceStatus> {
-    const doc = await getDB()
-      .collection("settings")
-      .doc("maintenance")
-      .get();
+    const doc = await getDB().collection("settings").doc("maintenance").get();
 
     if (!doc.exists) {
       return {
@@ -101,14 +99,11 @@ export class SettingsRepository {
   }
 
   static async disableMaintenance(): Promise<void> {
-    await getDB()
-      .collection("settings")
-      .doc("maintenance")
-      .set({
-        global: false,
-        services: [],
-        message: "",
-      });
+    await getDB().collection("settings").doc("maintenance").set({
+      global: false,
+      services: [],
+      message: "",
+    });
   }
 
   static async getSetting(key: string): Promise<any | null> {
@@ -122,14 +117,11 @@ export class SettingsRepository {
     value: any,
     updatedBy?: string,
   ): Promise<void> {
-    await getDB()
-      .collection("settings")
-      .doc(key)
-      .set({
-        key,
-        value,
-        updatedAt: Timestamp.now(),
-        updatedBy,
-      });
+    await getDB().collection("settings").doc(key).set({
+      key,
+      value,
+      updatedAt: Timestamp.now(),
+      updatedBy,
+    });
   }
 }

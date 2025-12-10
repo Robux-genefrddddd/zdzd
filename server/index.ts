@@ -95,8 +95,14 @@ export function createServer() {
   apiRouter.put("/admin/ai-config", adminRoutes.handleUpdateAIConfig);
   apiRouter.post("/admin/maintenance", adminRoutes.handleGetMaintenanceStatus);
   apiRouter.get("/admin/maintenance", adminRoutes.handleGetMaintenanceStatus);
-  apiRouter.post("/admin/maintenance/enable", adminRoutes.handleEnableMaintenance);
-  apiRouter.post("/admin/maintenance/disable", adminRoutes.handleDisableMaintenance);
+  apiRouter.post(
+    "/admin/maintenance/enable",
+    adminRoutes.handleEnableMaintenance,
+  );
+  apiRouter.post(
+    "/admin/maintenance/disable",
+    adminRoutes.handleDisableMaintenance,
+  );
   apiRouter.post("/admin/logs", adminRoutes.handleGetAdminLogs);
   apiRouter.post("/admin/logs/clear", adminRoutes.handleClearOldLogs);
   apiRouter.post("/admin/stats", adminRoutes.handleGetStats);

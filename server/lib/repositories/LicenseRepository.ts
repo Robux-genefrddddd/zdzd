@@ -46,10 +46,7 @@ export class LicenseRepository {
     return doc.data() as License;
   }
 
-  static async activateLicense(
-    key: string,
-    userId: string,
-  ): Promise<License> {
+  static async activateLicense(key: string, userId: string): Promise<License> {
     const license = await this.getLicense(key);
 
     if (!license) {
@@ -64,34 +61,25 @@ export class LicenseRepository {
       throw new Error("License already used by another account");
     }
 
-    await getDB()
-      .collection("licenses")
-      .doc(key)
-      .update({
-        usedBy: userId,
-        usedAt: Timestamp.now(),
-      });
+    await getDB().collection("licenses").doc(key).update({
+      usedBy: userId,
+      usedAt: Timestamp.now(),
+    });
 
     return { ...license, usedBy: userId, usedAt: Date.now() };
   }
 
   static async getAllLicenses(limit = 100): Promise<License[]> {
-    const snapshot = await getDB()
-      .collection("licenses")
-      .limit(limit)
-      .get();
+    const snapshot = await getDB().collection("licenses").limit(limit).get();
 
     return snapshot.docs.map((doc) => doc.data() as License);
   }
 
   static async invalidateLicense(key: string): Promise<void> {
-    await getDB()
-      .collection("licenses")
-      .doc(key)
-      .update({
-        valid: false,
-        invalidatedAt: Timestamp.now(),
-      });
+    await getDB().collection("licenses").doc(key).update({
+      valid: false,
+      invalidatedAt: Timestamp.now(),
+    });
   }
 
   static async deleteLicense(key: string): Promise<void> {

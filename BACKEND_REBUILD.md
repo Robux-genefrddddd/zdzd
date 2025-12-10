@@ -5,6 +5,7 @@
 This is a **complete rewrite** of the backend from scratch using **Firebase (Firestore) as the only database**. Everything is clean, stable, and production-ready.
 
 ### Architecture
+
 ```
 server/
 ├── env.ts                           # Environment validation
@@ -50,11 +51,13 @@ All routes use standardized response format:
 ```
 
 ### Authentication
+
 - `POST /api/auth/register` - Register new user
 - `POST /api/auth/verify` - Verify Firebase token & get user
 - `GET /api/auth/me` - Get current user (requires `idToken` in body)
 
 ### Chat
+
 - `POST /api/chat/send` - Send message to AI (creates conversation if needed)
 - `POST /api/chat/conversations` - Get all conversations
 - `POST /api/chat/create` - Create new conversation
@@ -62,6 +65,7 @@ All routes use standardized response format:
 - `POST /api/chat/delete` - Delete conversation
 
 ### License
+
 - `POST /api/license/activate` - Activate license key
 - `POST /api/license/list` - List all licenses (admin)
 - `POST /api/license/create` - Create license (admin)
@@ -70,6 +74,7 @@ All routes use standardized response format:
 - `POST /api/license/purge` - Delete all invalid licenses (admin)
 
 ### Admin Panel
+
 - `POST /api/admin/users` - List all users
 - `POST /api/admin/ban` - Ban user
 - `POST /api/admin/unban` - Unban user
@@ -89,9 +94,11 @@ All routes use standardized response format:
 ## 📝 Frontend Migration Guide
 
 ### ✅ What Works Without Changes
+
 Most of your frontend code works **without modification** because the API contracts are compatible!
 
 The frontend already expects:
+
 - Firebase authentication
 - POST requests to `/api/` endpoints
 - `idToken` in request body for auth
@@ -99,26 +106,30 @@ The frontend already expects:
 ### ⚠️ What Changed (Minimal Updates Needed)
 
 #### 1. Chat Endpoint Response
+
 **Before:**
+
 ```javascript
 response.data = {
   content: "...",
   messagesUsed: 10,
-  messagesLimit: 100
-}
+  messagesLimit: 100,
+};
 ```
 
 **Now (same, but in `data` object):**
+
 ```javascript
 response.data = {
   conversationId: "...",
   message: "...",
   messagesUsed: 10,
-  messagesLimit: 100
-}
+  messagesLimit: 100,
+};
 ```
 
 **Update in `client/lib/ai.ts`:**
+
 ```typescript
 // Replace this:
 const content = data.content || "No response";
@@ -129,6 +140,7 @@ const conversationId = data.data?.conversationId;
 ```
 
 #### 2. Conversation Routes (NEW)
+
 The backend now stores conversations! Update `client/lib/messages.ts`:
 
 ```typescript
@@ -158,13 +170,17 @@ export class MessagesService {
 ```
 
 #### 3. Auth Routes (Already Compatible)
+
 Your `client/contexts/AuthContext.tsx` should work as-is because:
+
 - Firebase Auth client handles login/registration
 - Token verification via `/api/auth/verify` works perfectly
 - User data is synced to Firestore automatically
 
 #### 4. Admin Routes (Already Compatible)
+
 The admin panel routes are 100% compatible with existing code. Just ensure:
+
 - All requests include `idToken` in body
 - User has `isAdmin: true` flag
 - Response format is `{ success, data, error }`
@@ -192,7 +208,9 @@ const response = await fetch("/api/chat/send", {
 const conversations = await fetch("/api/chat/conversations", {
   method: "POST",
   body: JSON.stringify({ idToken }),
-}).then(r => r.json()).then(d => d.data);
+})
+  .then((r) => r.json())
+  .then((d) => d.data);
 ```
 
 ## 🌐 Vercel Deployment (Exact Steps)
@@ -226,6 +244,7 @@ Your `package.json` already has the right build scripts:
 ```
 
 Vercel will:
+
 1. Run `npm run build`
 2. Detect Node.js app
 3. Run `npm start`
@@ -233,6 +252,7 @@ Vercel will:
 ### 3. Verify Deployment
 
 After deploy, test:
+
 ```bash
 curl https://your-vercel-domain.vercel.app/health
 # Should return: {"status":"ok","timestamp":"..."}
@@ -247,6 +267,7 @@ curl https://your-vercel-domain.vercel.app/api/auth/verify \
 ## 🧪 Testing Locally
 
 1. Set env vars:
+
 ```bash
 export FIREBASE_SERVICE_ACCOUNT_KEY='{"type":"service_account",...}'
 export OPENROUTER_API_KEY='your-key'
@@ -255,11 +276,13 @@ export ADMIN_PANEL_SECRET='admin'
 ```
 
 2. Start dev server:
+
 ```bash
 pnpm dev
 ```
 
 3. Test chat:
+
 ```bash
 curl http://localhost:3001/api/chat/send \
   -X POST \
@@ -293,15 +316,19 @@ Backend automatically creates these collections in Firestore:
 ## 🐛 Troubleshooting
 
 ### "Firebase Admin SDK not initialized"
+
 → Check `FIREBASE_SERVICE_ACCOUNT_KEY` is set and valid JSON
 
 ### "Invalid or expired token"
+
 → Token must be a valid Firebase ID token from your auth domain
 
 ### "AI service error"
+
 → Check `OPENROUTER_API_KEY` is set and has credits
 
 ### Conversations not saving
+
 → Make sure `conversationId` is passed to subsequent messages to keep them in same conversation
 
 ## 🎯 Next Steps

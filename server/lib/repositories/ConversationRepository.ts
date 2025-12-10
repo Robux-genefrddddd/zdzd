@@ -130,9 +130,7 @@ export class ConversationRepository {
     conversationId: string,
   ): Promise<Message[]> {
     const snapshot = await getDB()
-      .collection(
-        `users/${userId}/conversations/${conversationId}/messages`,
-      )
+      .collection(`users/${userId}/conversations/${conversationId}/messages`)
       .orderBy("timestamp", "asc")
       .get();
 
