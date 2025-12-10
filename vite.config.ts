@@ -25,10 +25,10 @@ function expressPlugin(): Plugin {
     apply: "serve",
     configureServer(server) {
       const app = createServer();
-      // Only mount API routes and specific handlers
-      // Let Vite handle SPA routing and static files
-      server.middlewares.use("/api", app);
-      server.middlewares.use("/health", app);
+      // Mount Express after other middleware so Vite can handle static files first
+      return () => {
+        server.middlewares.use(app);
+      };
     },
   };
 }
