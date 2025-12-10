@@ -8,7 +8,7 @@ import { z } from "zod";
 import { getAuth_ } from "../../lib/firebase-db";
 import { UserRepository } from "../../lib/repositories/UserRepository";
 import { ConversationRepository } from "../../lib/repositories/ConversationRepository";
-import { ENV } from "../../env.ts";
+import { ENV } from "../../env";
 
 // Schemas
 const ChatMessageSchema = z.object({
