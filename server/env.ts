@@ -32,7 +32,7 @@ function getEnvVar(name: string, defaultValue?: string): string {
   return value || defaultValue || "";
 }
 
-export function validateEnv(): EnvConfig {
+function loadEnv(): EnvConfig {
   console.log("🔍 Validating environment variables...");
 
   try {
@@ -102,5 +102,13 @@ export function validateEnv(): EnvConfig {
   }
 }
 
-// Export singleton instance
-export const ENV = validateEnv();
+let env: EnvConfig | null = null;
+
+export function getEnv(): EnvConfig {
+  if (!env) {
+    env = loadEnv();
+  }
+  return env;
+}
+
+export const ENV = getEnv();
