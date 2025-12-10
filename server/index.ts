@@ -135,6 +135,25 @@ export function createServer() {
     },
   );
 
+  // Legacy admin license routes
+  apiRouter.get("/admin/licenses", adminLegacyRoutes.handleGetLicenses);
+  apiRouter.post(
+    "/admin/create-license",
+    adminLegacyRoutes.handleCreateLicense,
+  );
+  apiRouter.post(
+    "/admin/delete-license",
+    adminLegacyRoutes.handleDeleteLicense,
+  );
+  apiRouter.post(
+    "/admin/clear-logs",
+    adminLegacyRoutes.handleClearOldLogs,
+  );
+  apiRouter.post(
+    "/admin/purge-licenses",
+    adminLegacyRoutes.handlePurgeLicenses,
+  );
+
   // BACKWARD COMPATIBILITY ROUTES (map old paths to new ones)
   // These keep the frontend working without modifications
   apiRouter.post("/ai/chat", chatRoutes.handleSendMessage);
