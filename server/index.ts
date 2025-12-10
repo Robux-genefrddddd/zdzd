@@ -55,6 +55,14 @@ export function createServer() {
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
+  // IP Detection Middleware - Attach real IP to all requests
+  app.use((req, res, next) => {
+    const clientIP = IPDetectionService.getClientIP(req);
+    (req as any).clientIP = clientIP;
+    res.setHeader("X-Client-IP", clientIP);
+    next();
+  });
+
   // Health check
   app.get("/health", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
