@@ -25,7 +25,31 @@ function expressPlugin(): Plugin {
     apply: "serve",
     configureServer(server) {
       const app = createServer();
+
+      // Add Express app middleware FIRST
       server.middlewares.use(app);
+
+      // Add SPA fallback AFTER Express (for routes not handled by Express)
+      server.middlewares.use((req, res, next) => {
+        // Only apply SPA fallback for GET requests to non-API routes
+        if (
+          req.method === "GET" &&
+          !req.url.startsWith("/api") &&
+          !req.url.includes(".")
+        ) {
+          // Read the index.html from the project root
+          const fs = require("fs");
+          const path = require("path");
+          const indexPath = path.join(process.cwd(), "index.html");
+
+          if (fs.existsSync(indexPath)) {
+            const content = fs.readFileSync(indexPath, "utf-8");
+            res.setHeader("Content-Type", "text/html; charset=utf-8");
+            return res.end(content);
+          }
+        }
+        next();
+      });
     },
   };
 }

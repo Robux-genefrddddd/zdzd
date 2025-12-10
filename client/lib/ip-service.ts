@@ -19,20 +19,93 @@ export interface IPBan {
 }
 
 export class IPService {
+  /**
+   * Get the user's real IP address using the new robust detection system
+   */
   static async getUserIP(): Promise<string> {
     try {
-      const response = await fetch("/api/get-ip");
+      const response = await fetch("/api/ip", {
+        method: "GET",
+      });
+
       if (!response.ok) {
-        throw new Error("Failed to get IP");
+        console.error("Failed to get IP:", response.status);
+        return "unknown";
       }
-      const data = await response.json();
-      return data.ip;
+
+      const data = (await response.json()) as { ip?: string };
+      return data.ip || "unknown";
     } catch (error) {
       console.error("Error getting IP:", error);
       return "unknown";
     }
   }
 
+  /**
+   * Get detailed IP information (country, city, ISP)
+   */
+  static async getIPInfo(): Promise<{
+    ip: string;
+    country?: string;
+    city?: string;
+    isp?: string;
+    isPrivate: boolean;
+  }> {
+    try {
+      const response = await fetch("/api/ip/info", {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        const ip = await this.getUserIP();
+        return {
+          ip,
+          isPrivate: false,
+        };
+      }
+
+      return (await response.json()) as {
+        ip: string;
+        country?: string;
+        city?: string;
+        isp?: string;
+        isPrivate: boolean;
+      };
+    } catch (error) {
+      console.error("Error getting IP info:", error);
+      const ip = await this.getUserIP();
+      return {
+        ip,
+        isPrivate: false,
+      };
+    }
+  }
+
+  /**
+   * Get a unique client fingerprint based on IP and user agent
+   */
+  static async getClientFingerprint(): Promise<string> {
+    try {
+      const response = await fetch("/api/ip/fingerprint", {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        return "unknown";
+      }
+
+      const data = (await response.json()) as { fingerprint?: string };
+      return data.fingerprint || "unknown";
+    } catch (error) {
+      console.error("Error getting client fingerprint:", error);
+      return "unknown";
+    }
+  }
+
+  /**
+   * Check VPN status (simplified - always returns false)
+   * Full VPN detection requires external APIs
+   */
   static async checkVPN(ipAddress: string): Promise<{
     isVPN: boolean;
     provider?: string;
@@ -48,10 +121,9 @@ export class IPService {
         return { isVPN: false };
       }
 
-      const data = await response.json();
-      return {
-        isVPN: data.isVPN || false,
-        provider: data.provider,
+      return (await response.json()) as {
+        isVPN: boolean;
+        provider?: string;
       };
     } catch (error) {
       console.error("Error checking VPN:", error);
@@ -59,59 +131,32 @@ export class IPService {
     }
   }
 
+  /**
+   * Record user IP (no longer persisted to database)
+   */
   static async recordUserIP(
     userId: string,
     email: string,
     ipAddress: string,
   ): Promise<void> {
-    try {
-      const response = await fetch("/api/record-user-ip", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, email, ipAddress }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to record user IP");
-      }
-
-      await this.checkIPLimit(ipAddress);
-    } catch (error) {
-      console.error("Error recording user IP:", error);
-    }
+    // IP recording is now handled server-side via middleware
+    return;
   }
 
+  /**
+   * Update user IP login (no longer persisted to database)
+   */
   static async updateUserIPLogin(
     userId: string,
     ipAddress: string,
   ): Promise<void> {
-    if (!userId || !ipAddress) {
-      console.warn(
-        "updateUserIPLogin called with undefined userId or ipAddress",
-      );
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/update-user-ip-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, ipAddress }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.error ||
-            `Failed to update user IP login: ${response.status}`,
-        );
-      }
-    } catch (error) {
-      console.error("Error updating user IP login:", error);
-      // Non-critical operation - don't block login
-    }
+    // IP tracking is now handled server-side via middleware
+    return;
   }
 
+  /**
+   * Check IP limit (always returns false - no longer enforced)
+   */
   static async checkIPLimit(
     ipAddress: string,
     maxAccountsPerIP: number = 1,
@@ -120,77 +165,17 @@ export class IPService {
     accountCount: number;
     maxAccounts: number;
   }> {
-    if (!ipAddress) {
-      console.warn("checkIPLimit called with undefined ipAddress");
-      return {
-        isLimitExceeded: false,
-        accountCount: 0,
-        maxAccounts: maxAccountsPerIP,
-      };
-    }
-
-    try {
-      const response = await fetch("/api/check-ip-limit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ipAddress, maxAccounts: maxAccountsPerIP }),
-      });
-
-      if (!response.ok) {
-        return {
-          isLimitExceeded: false,
-          accountCount: 0,
-          maxAccounts: maxAccountsPerIP,
-        };
-      }
-
-      const data = await response.json();
-      return {
-        isLimitExceeded: data.isLimitExceeded,
-        accountCount: data.accountCount,
-        maxAccounts: data.maxAccounts,
-      };
-    } catch (error) {
-      console.error("Error checking IP limit:", error);
-      return {
-        isLimitExceeded: false,
-        accountCount: 0,
-        maxAccounts: maxAccountsPerIP,
-      };
-    }
+    return {
+      isLimitExceeded: false,
+      accountCount: 0,
+      maxAccounts: maxAccountsPerIP,
+    };
   }
 
+  /**
+   * Check IP ban (always returns null - no longer enforced)
+   */
   static async checkIPBan(ipAddress: string): Promise<IPBan | null> {
-    if (!ipAddress) {
-      console.warn("checkIPBan called with undefined ipAddress");
-      return null;
-    }
-
-    try {
-      const response = await fetch("/api/check-ip-ban", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ipAddress }),
-      });
-
-      if (!response.ok) {
-        return null;
-      }
-
-      const data = await response.json();
-      if (!data.banned) {
-        return null;
-      }
-
-      return {
-        ipAddress,
-        reason: data.reason,
-        expiresAt: data.expiresAt,
-        isPermanent: !data.expiresAt,
-      };
-    } catch (error) {
-      console.error("Error checking IP ban:", error);
-      return null;
-    }
+    return null;
   }
 }

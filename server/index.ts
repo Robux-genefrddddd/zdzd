@@ -3,14 +3,17 @@ import express from "express";
 import cors from "cors";
 import { initializeFirebase } from "./lib/firebase-db";
 import { ENV } from "./env";
+import { IPDetectionService } from "./lib/ip-detection-service";
 
 // Import route handlers
 import * as authRoutes from "./routes/v1/auth";
 import * as chatRoutes from "./routes/v1/chat";
 import * as adminRoutes from "./routes/v1/admin";
 import * as licenseRoutes from "./routes/v1/license";
+import * as ipApiRoutes from "./routes/ip-api";
+import * as adminLegacyRoutes from "./routes/admin";
 
-export function createServer() {
+export function createServer(isDev: boolean = false) {
   console.log("🚀 Starting server initialization...");
 
   // Initialize Firebase
@@ -52,6 +55,14 @@ export function createServer() {
   // Body parser
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+  // IP Detection Middleware - Attach real IP to all requests
+  app.use((req, res, next) => {
+    const clientIP = IPDetectionService.getClientIP(req);
+    (req as any).clientIP = clientIP;
+    res.setHeader("X-Client-IP", clientIP);
+    next();
+  });
 
   // Health check
   app.get("/health", (req, res) => {
@@ -108,6 +119,35 @@ export function createServer() {
   apiRouter.post("/admin/stats", adminRoutes.handleGetStats);
   apiRouter.get("/admin/stats", adminRoutes.handleGetStats);
 
+  // IP Detection API Routes (new robust system)
+  apiRouter.get("/ip", ipApiRoutes.handleGetClientIP);
+  apiRouter.get("/ip/info", ipApiRoutes.handleGetIPInfo);
+  apiRouter.get("/ip/fingerprint", ipApiRoutes.handleGetClientFingerprint);
+  apiRouter.get("/ip/health", ipApiRoutes.handleIPDetectionHealth);
+
+  // Legacy IP detection routes (for backward compatibility)
+  apiRouter.get("/get-ip", ipApiRoutes.handleGetClientIP);
+  apiRouter.post("/check-vpn", (req, res) => {
+    // VPN detection not implemented in new system
+    res.json({ isVPN: false, provider: undefined });
+  });
+
+  // Legacy admin license routes
+  apiRouter.get("/admin/licenses", adminLegacyRoutes.handleGetLicenses);
+  apiRouter.post(
+    "/admin/create-license",
+    adminLegacyRoutes.handleCreateLicense,
+  );
+  apiRouter.post(
+    "/admin/delete-license",
+    adminLegacyRoutes.handleDeleteLicense,
+  );
+  apiRouter.post("/admin/clear-logs", adminLegacyRoutes.handleClearOldLogs);
+  apiRouter.post(
+    "/admin/purge-licenses",
+    adminLegacyRoutes.handlePurgeLicenses,
+  );
+
   // BACKWARD COMPATIBILITY ROUTES (map old paths to new ones)
   // These keep the frontend working without modifications
   apiRouter.post("/ai/chat", chatRoutes.handleSendMessage);
@@ -127,29 +167,50 @@ export function createServer() {
   // Mount API router
   app.use("/api", apiRouter);
 
-  // 404 handler
-  app.use((req, res) => {
-    res.status(404).json({
-      success: false,
-      error: "Not found",
-    });
-  });
+  // Serve static files from public directory
+  app.use(express.static("public"));
 
-  // Error handler
+  // Error handler (for API errors)
   app.use(
     (
       err: unknown,
-      _req: express.Request,
+      req: express.Request,
       res: express.Response,
-      _next: express.NextFunction,
+      next: express.NextFunction,
     ) => {
-      console.error("Unhandled error:", err);
-      res.status(500).json({
-        success: false,
-        error: "Internal server error",
-      });
+      // Only handle errors for API routes
+      if (req.path.startsWith("/api")) {
+        console.error("Unhandled error:", err);
+        res.status(500).json({
+          success: false,
+          error: "Internal server error",
+        });
+      } else {
+        next(err);
+      }
     },
   );
+
+  // SPA fallback for non-API routes
+  // Serve index.html for all other requests to enable client-side routing
+  app.get("*", (req, res) => {
+    // For production builds, serve dist/spa/index.html
+    const fs = require("fs");
+    const path = require("path");
+    const indexPath = path.join(process.cwd(), "dist/spa/index.html");
+
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      // In development, Vite handles this through its own middleware
+      // Return a message indicating the dev server should handle it
+      res.status(404).json({
+        success: false,
+        error:
+          "Not found - are you running in development mode? Make sure to use `npm run dev`",
+      });
+    }
+  });
 
   return app;
 }
