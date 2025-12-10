@@ -13,7 +13,7 @@ import * as licenseRoutes from "./routes/v1/license";
 import * as ipApiRoutes from "./routes/ip-api";
 import * as adminLegacyRoutes from "./routes/admin";
 
-export function createServer() {
+export function createServer(isDev: boolean = false) {
   console.log("🚀 Starting server initialization...");
 
   // Initialize Firebase
