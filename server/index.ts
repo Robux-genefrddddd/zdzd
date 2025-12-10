@@ -173,11 +173,20 @@ export function createServer() {
   // Mount API router
   app.use("/api", apiRouter);
 
-  // 404 handler
-  app.use((req, res) => {
-    res.status(404).json({
-      success: false,
-      error: "Not found",
+  // Serve static files from dist/spa
+  app.use(express.static("dist/spa", { maxAge: "1d" }));
+
+  // SPA fallback - serve index.html for all non-API routes
+  // This allows React Router to handle client-side routing
+  app.get("*", (req, res) => {
+    res.sendFile("dist/spa/index.html", { root: process.cwd() }, (err) => {
+      if (err) {
+        // If file not found (e.g., during dev), return 404
+        res.status(404).json({
+          success: false,
+          error: "Not found",
+        });
+      }
     });
   });
 
