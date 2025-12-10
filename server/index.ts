@@ -118,6 +118,21 @@ export function createServer() {
   apiRouter.post("/admin/stats", adminRoutes.handleGetStats);
   apiRouter.get("/admin/stats", adminRoutes.handleGetStats);
 
+  // IP Detection API Routes (new robust system)
+  apiRouter.get("/ip", ipApiRoutes.handleGetClientIP);
+  apiRouter.get("/ip/info", ipApiRoutes.handleGetIPInfo);
+  apiRouter.get("/ip/fingerprint", ipApiRoutes.handleGetClientFingerprint);
+  apiRouter.get("/ip/health", ipApiRoutes.handleIPDetectionHealth);
+
+  // Legacy IP detection routes (for backward compatibility)
+  apiRouter.get("/get-ip", ipApiRoutes.handleGetClientIP);
+  apiRouter.post(
+    "/check-vpn",
+    (req, res) => {
+      // VPN detection not implemented in new system
+      res.json({ isVPN: false, provider: undefined });
+    },
+  );
 
   // BACKWARD COMPATIBILITY ROUTES (map old paths to new ones)
   // These keep the frontend working without modifications
