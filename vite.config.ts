@@ -25,10 +25,7 @@ function expressPlugin(): Plugin {
     apply: "serve",
     configureServer(server) {
       const app = createServer();
-      // Mount Express after other middleware so Vite can handle static files first
-      return () => {
-        server.middlewares.use(app);
-      };
+      server.middlewares.use(app);
     },
   };
 }
