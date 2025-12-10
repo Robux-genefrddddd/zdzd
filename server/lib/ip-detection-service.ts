@@ -18,7 +18,9 @@ export class IPDetectionService {
     if (ipAddress && this.isValidIP(ipAddress)) return ipAddress;
 
     // X-Forwarded-For (common proxy header)
-    ipAddress = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim();
+    ipAddress = (req.headers["x-forwarded-for"] as string)
+      ?.split(",")[0]
+      ?.trim();
     if (ipAddress && this.isValidIP(ipAddress)) return ipAddress;
 
     // CF-Connecting-IP (CloudFlare)
@@ -78,8 +80,7 @@ export class IPDetectionService {
     if (ipv6Regex.test(ip)) return true;
 
     // Allow localhost variations
-    if (ip === "localhost" || ip === "127.0.0.1" || ip === "::1")
-      return true;
+    if (ip === "localhost" || ip === "127.0.0.1" || ip === "::1") return true;
 
     return false;
   }
@@ -97,7 +98,7 @@ export class IPDetectionService {
       /^fc00:/i, // IPv6 private
       /^fe80:/i, // IPv6 link-local
       /^::1$/, // IPv6 loopback
-      /^::$/,  // IPv6 unspecified
+      /^::$/, // IPv6 unspecified
     ];
 
     return privateIPRanges.some((range) => range.test(ip));
@@ -106,9 +107,7 @@ export class IPDetectionService {
   /**
    * Get IP information (country, ISP, etc.) - uses a free API if available
    */
-  static async getIPInfo(
-    ip: string,
-  ): Promise<{
+  static async getIPInfo(ip: string): Promise<{
     ip: string;
     country?: string;
     city?: string;
@@ -165,10 +164,7 @@ export class IPDetectionService {
   /**
    * Generate a unique client fingerprint from IP and user agent
    */
-  static generateClientFingerprint(
-    ip: string,
-    userAgent?: string,
-  ): string {
+  static generateClientFingerprint(ip: string, userAgent?: string): string {
     const data = `${ip}:${userAgent || "unknown"}`;
     // Simple hash using native crypto
     let hash = 0;

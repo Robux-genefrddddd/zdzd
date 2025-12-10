@@ -32,7 +32,11 @@ function expressPlugin(): Plugin {
       // Add SPA fallback AFTER Express (for routes not handled by Express)
       server.middlewares.use((req, res, next) => {
         // Only apply SPA fallback for GET requests to non-API routes
-        if (req.method === "GET" && !req.url.startsWith("/api") && !req.url.includes(".")) {
+        if (
+          req.method === "GET" &&
+          !req.url.startsWith("/api") &&
+          !req.url.includes(".")
+        ) {
           // Read the index.html from the project root
           const fs = require("fs");
           const path = require("path");

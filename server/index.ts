@@ -127,13 +127,10 @@ export function createServer(isDev: boolean = false) {
 
   // Legacy IP detection routes (for backward compatibility)
   apiRouter.get("/get-ip", ipApiRoutes.handleGetClientIP);
-  apiRouter.post(
-    "/check-vpn",
-    (req, res) => {
-      // VPN detection not implemented in new system
-      res.json({ isVPN: false, provider: undefined });
-    },
-  );
+  apiRouter.post("/check-vpn", (req, res) => {
+    // VPN detection not implemented in new system
+    res.json({ isVPN: false, provider: undefined });
+  });
 
   // Legacy admin license routes
   apiRouter.get("/admin/licenses", adminLegacyRoutes.handleGetLicenses);
@@ -145,10 +142,7 @@ export function createServer(isDev: boolean = false) {
     "/admin/delete-license",
     adminLegacyRoutes.handleDeleteLicense,
   );
-  apiRouter.post(
-    "/admin/clear-logs",
-    adminLegacyRoutes.handleClearOldLogs,
-  );
+  apiRouter.post("/admin/clear-logs", adminLegacyRoutes.handleClearOldLogs);
   apiRouter.post(
     "/admin/purge-licenses",
     adminLegacyRoutes.handlePurgeLicenses,
@@ -212,7 +206,8 @@ export function createServer(isDev: boolean = false) {
       // Return a message indicating the dev server should handle it
       res.status(404).json({
         success: false,
-        error: "Not found - are you running in development mode? Make sure to use `npm run dev`",
+        error:
+          "Not found - are you running in development mode? Make sure to use `npm run dev`",
       });
     }
   });
