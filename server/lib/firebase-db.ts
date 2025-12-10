@@ -6,7 +6,7 @@
 import { initializeApp, cert, getApp, getApps } from "firebase-admin/app";
 import { getFirestore, Firestore, Timestamp } from "firebase-admin/firestore";
 import { getAuth, Auth } from "firebase-admin/auth";
-import { ENV } from "../env";
+import { getEnv } from "../env";
 
 let db: Firestore | null = null;
 let auth: Auth | null = null;
@@ -17,6 +17,7 @@ export function initializeFirebase(): { db: Firestore; auth: Auth } {
       return { db, auth };
     }
 
+    const ENV = getEnv();
     const serviceAccount = JSON.parse(ENV.firebase.serviceAccountKey);
 
     let app;
