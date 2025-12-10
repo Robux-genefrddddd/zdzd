@@ -26,34 +26,26 @@ function expressPlugin(): Plugin {
     configureServer(server) {
       const app = createServer();
 
-      return () => {
-        // Add Express app middleware FIRST
-        server.middlewares.use(app);
+      // Add Express app middleware FIRST
+      server.middlewares.use(app);
 
-        // Add SPA fallback AFTER Express (for routes not handled by Express)
-        server.middlewares.use((req, res, next) => {
-          // Only apply SPA fallback for GET requests to non-API routes
-          if (req.method === "GET" && !req.url.startsWith("/api")) {
-            // Check if it's not a file request (no extension)
-            if (!req.url.includes(".")) {
-              res.setHeader("Content-Type", "text/html; charset=utf-8");
-              return res.end(`
-                <!DOCTYPE html>
-                <html>
-                  <head>
-                    <title>VanIA</title>
-                    <script type="module" src="/src/main.tsx"></script>
-                  </head>
-                  <body>
-                    <div id="root"></div>
-                  </body>
-                </html>
-              `);
-            }
+      // Add SPA fallback AFTER Express (for routes not handled by Express)
+      server.middlewares.use((req, res, next) => {
+        // Only apply SPA fallback for GET requests to non-API routes
+        if (req.method === "GET" && !req.url.startsWith("/api") && !req.url.includes(".")) {
+          // Read the index.html from the project root
+          const fs = require("fs");
+          const path = require("path");
+          const indexPath = path.join(process.cwd(), "index.html");
+
+          if (fs.existsSync(indexPath)) {
+            const content = fs.readFileSync(indexPath, "utf-8");
+            res.setHeader("Content-Type", "text/html; charset=utf-8");
+            return res.end(content);
           }
-          next();
-        });
-      };
+        }
+        next();
+      });
     },
   };
 }
