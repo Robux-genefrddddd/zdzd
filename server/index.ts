@@ -111,6 +111,38 @@ export function createServer() {
   apiRouter.post("/admin/stats", adminRoutes.handleGetStats);
   apiRouter.get("/admin/stats", adminRoutes.handleGetStats);
 
+  // IP detection routes
+  apiRouter.get("/get-ip", ipDetectionRoutes.handleGetIP);
+  apiRouter.post("/check-vpn", ipDetectionRoutes.handleCheckVPN);
+
+  // IP management routes
+  apiRouter.post("/record-user-ip", ipManagementRoutes.handleRecordUserIP);
+  apiRouter.post(
+    "/update-user-ip-login",
+    ipManagementRoutes.handleUpdateUserIPLogin,
+  );
+  apiRouter.post("/check-ip-limit", ipManagementRoutes.handleCheckIPLimit);
+  apiRouter.post("/check-ip-ban", ipManagementRoutes.handleCheckIPBan);
+
+  // Legacy admin routes (for backward compatibility with client)
+  apiRouter.get("/admin/licenses", adminLegacyRoutes.handleGetLicenses);
+  apiRouter.post(
+    "/admin/create-license",
+    adminLegacyRoutes.handleCreateLicense,
+  );
+  apiRouter.post(
+    "/admin/delete-license",
+    adminLegacyRoutes.handleDeleteLicense,
+  );
+  apiRouter.post(
+    "/admin/clear-logs",
+    adminLegacyRoutes.handleClearOldLogs,
+  );
+  apiRouter.post(
+    "/admin/purge-licenses",
+    adminLegacyRoutes.handlePurgeLicenses,
+  );
+
   // BACKWARD COMPATIBILITY ROUTES (map old paths to new ones)
   // These keep the frontend working without modifications
   apiRouter.post("/ai/chat", chatRoutes.handleSendMessage);
