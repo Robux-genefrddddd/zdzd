@@ -4,7 +4,7 @@
  */
 
 import { RequestHandler } from "express";
-import { z } from "express";
+import { z } from "zod";
 import { getAuth_ } from "../../lib/firebase-db";
 import { UserRepository } from "../../lib/repositories/UserRepository";
 import { AdminLogsRepository } from "../../lib/repositories/AdminLogsRepository";
