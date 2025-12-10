@@ -3,12 +3,14 @@ import express from "express";
 import cors from "cors";
 import { initializeFirebase } from "./lib/firebase-db";
 import { ENV } from "./env";
+import { IPDetectionService } from "./lib/ip-detection-service";
 
 // Import route handlers
 import * as authRoutes from "./routes/v1/auth";
 import * as chatRoutes from "./routes/v1/chat";
 import * as adminRoutes from "./routes/v1/admin";
 import * as licenseRoutes from "./routes/v1/license";
+import * as ipApiRoutes from "./routes/ip-api";
 
 export function createServer() {
   console.log("🚀 Starting server initialization...");
