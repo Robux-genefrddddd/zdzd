@@ -173,21 +173,26 @@ export function createServer() {
   // Mount API router
   app.use("/api", apiRouter);
 
-  // Serve static files from dist/spa
-  app.use(express.static("dist/spa", { maxAge: "1d" }));
+  // Serve static files from public directory
+  app.use(express.static("public"));
 
-  // SPA fallback - serve index.html for all non-API routes
+  // SPA fallback - serve index.html for all non-API, non-static routes
   // This allows React Router to handle client-side routing
   app.get("*", (req, res) => {
-    res.sendFile("dist/spa/index.html", { root: process.cwd() }, (err) => {
-      if (err) {
-        // If file not found (e.g., during dev), return 404
-        res.status(404).json({
-          success: false,
-          error: "Not found",
-        });
-      }
-    });
+    const indexPath = "dist/spa/index.html";
+    const fs = require("fs");
+
+    if (fs.existsSync(indexPath)) {
+      // In production mode - serve the built SPA
+      res.sendFile(indexPath, { root: process.cwd() });
+    } else {
+      // In development mode with Vite dev server - return 404
+      // (Vite will handle serving index.html for routes)
+      res.status(404).json({
+        success: false,
+        error: "Not found",
+      });
+    }
   });
 
   // Error handler
