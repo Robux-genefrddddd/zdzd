@@ -127,23 +127,32 @@ export class IPDetectionService {
 
     // Try to get additional info from a free API (optional)
     try {
-      const response = await fetch(`https://ipapi.co/${ip}/json/`, {
-        timeout: 3000,
-      });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3000);
 
-      if (response.ok) {
-        const data = (await response.json()) as {
-          country_name?: string;
-          city?: string;
-          org?: string;
-        };
-        return {
-          ip,
-          country: data.country_name,
-          city: data.city,
-          isp: data.org,
-          isPrivate: false,
-        };
+      try {
+        const response = await fetch(`https://ipapi.co/${ip}/json/`, {
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeout);
+
+        if (response.ok) {
+          const data = (await response.json()) as {
+            country_name?: string;
+            city?: string;
+            org?: string;
+          };
+          return {
+            ip,
+            country: data.country_name,
+            city: data.city,
+            isp: data.org,
+            isPrivate: false,
+          };
+        }
+      } finally {
+        clearTimeout(timeout);
       }
     } catch (error) {
       // Silently fail - return basic info
