@@ -19,36 +19,144 @@ export interface IPBan {
 }
 
 export class IPService {
+  /**
+   * Get the user's real IP address using the new robust detection system
+   */
   static async getUserIP(): Promise<string> {
-    // IP detection service has been removed
-    return "unknown";
+    try {
+      const response = await fetch("/api/ip", {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        console.error("Failed to get IP:", response.status);
+        return "unknown";
+      }
+
+      const data = (await response.json()) as { ip?: string };
+      return data.ip || "unknown";
+    } catch (error) {
+      console.error("Error getting IP:", error);
+      return "unknown";
+    }
   }
 
+  /**
+   * Get detailed IP information (country, city, ISP)
+   */
+  static async getIPInfo(): Promise<{
+    ip: string;
+    country?: string;
+    city?: string;
+    isp?: string;
+    isPrivate: boolean;
+  }> {
+    try {
+      const response = await fetch("/api/ip/info", {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        const ip = await this.getUserIP();
+        return {
+          ip,
+          isPrivate: false,
+        };
+      }
+
+      return (await response.json()) as {
+        ip: string;
+        country?: string;
+        city?: string;
+        isp?: string;
+        isPrivate: boolean;
+      };
+    } catch (error) {
+      console.error("Error getting IP info:", error);
+      const ip = await this.getUserIP();
+      return {
+        ip,
+        isPrivate: false,
+      };
+    }
+  }
+
+  /**
+   * Get a unique client fingerprint based on IP and user agent
+   */
+  static async getClientFingerprint(): Promise<string> {
+    try {
+      const response = await fetch("/api/ip/fingerprint", {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        return "unknown";
+      }
+
+      const data = (await response.json()) as { fingerprint?: string };
+      return data.fingerprint || "unknown";
+    } catch (error) {
+      console.error("Error getting client fingerprint:", error);
+      return "unknown";
+    }
+  }
+
+  /**
+   * Check VPN status (simplified - always returns false)
+   * Full VPN detection requires external APIs
+   */
   static async checkVPN(ipAddress: string): Promise<{
     isVPN: boolean;
     provider?: string;
   }> {
-    // VPN checking service has been removed
-    return { isVPN: false };
+    try {
+      const response = await fetch("/api/check-vpn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ipAddress }),
+      });
+
+      if (!response.ok) {
+        return { isVPN: false };
+      }
+
+      return (await response.json()) as {
+        isVPN: boolean;
+        provider?: string;
+      };
+    } catch (error) {
+      console.error("Error checking VPN:", error);
+      return { isVPN: false };
+    }
   }
 
+  /**
+   * Record user IP (no longer persisted to database)
+   */
   static async recordUserIP(
     userId: string,
     email: string,
     ipAddress: string,
   ): Promise<void> {
-    // IP recording service has been removed
+    // IP recording is now handled server-side via middleware
     return;
   }
 
+  /**
+   * Update user IP login (no longer persisted to database)
+   */
   static async updateUserIPLogin(
     userId: string,
     ipAddress: string,
   ): Promise<void> {
-    // IP login update service has been removed
+    // IP tracking is now handled server-side via middleware
     return;
   }
 
+  /**
+   * Check IP limit (always returns false - no longer enforced)
+   */
   static async checkIPLimit(
     ipAddress: string,
     maxAccountsPerIP: number = 1,
@@ -57,7 +165,6 @@ export class IPService {
     accountCount: number;
     maxAccounts: number;
   }> {
-    // IP limit checking service has been removed
     return {
       isLimitExceeded: false,
       accountCount: 0,
@@ -65,8 +172,10 @@ export class IPService {
     };
   }
 
+  /**
+   * Check IP ban (always returns null - no longer enforced)
+   */
   static async checkIPBan(ipAddress: string): Promise<IPBan | null> {
-    // IP ban checking service has been removed
     return null;
   }
 }
