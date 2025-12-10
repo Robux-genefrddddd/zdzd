@@ -11,6 +11,7 @@ import * as chatRoutes from "./routes/v1/chat";
 import * as adminRoutes from "./routes/v1/admin";
 import * as licenseRoutes from "./routes/v1/license";
 import * as ipApiRoutes from "./routes/ip-api";
+import * as adminLegacyRoutes from "./routes/admin";
 
 export function createServer() {
   console.log("🚀 Starting server initialization...");
