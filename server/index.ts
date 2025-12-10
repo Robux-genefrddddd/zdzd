@@ -9,9 +9,6 @@ import * as authRoutes from "./routes/v1/auth";
 import * as chatRoutes from "./routes/v1/chat";
 import * as adminRoutes from "./routes/v1/admin";
 import * as licenseRoutes from "./routes/v1/license";
-import * as ipDetectionRoutes from "./routes/ip-detection";
-import * as ipManagementRoutes from "./routes/ip-management";
-import * as adminLegacyRoutes from "./routes/admin";
 
 export function createServer() {
   console.log("🚀 Starting server initialization...");
